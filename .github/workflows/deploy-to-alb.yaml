@@ -1,0 +1,53 @@
+name: Deploy Application to AWS
+
+on:
+ push:
+  branches:
+    - master
+
+jobs:
+  deploy:
+   name: Build and Deploy to AWS
+   runs-on: ubunut:latest
+
+   steps:
+   - name: Checkout Code
+     uses: actions/checkout@v3
+
+   - name: Setup Java
+     uses: actions/setup-java@v3
+     with:
+        java-version: "17"
+
+   - name: Build application
+     run: mvn clean package
+
+   - name: Configure AWS Credentials
+     uses: aws-actions/configure-aws-credentials@v3
+     with:
+      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      aws-region: us-east-1 # Change to your AWS region
+
+
+   - name: Launch EC2 Instances
+     id: ec2
+     run: |
+        # Launch two EC2 instances
+        INSTANCE_ID_1=$(aws ec2 run-instances \
+          --image-id ami-005fc0f236362e99f \ # AMI ID
+          --count 1 \
+          --instance-type t2.medium \
+          --key-name ssh-key \ # key pair
+          --security-group-ids sg-07e932f4ed3166957 \ # security group
+          --subnet-id subnet-0fe87ebda1a7b5f53 \ # subnet id
+          --query "Instances[0].InstanceId" --output text)
+
+        INSTANCE_ID_2=$(aws ec2 run-instances \
+          --image-id ami-005fc0f236362e99f \ # AMI ID
+          --count 1 \
+          --instance-type t2.medium \
+          --key-name ssh-key \ # key pair
+          --security-group-ids sg-07e932f4ed3166957 \ # security group
+          --subnet-id subnet-0efd990422b52c3e8 \ # subnet id
+          --query "Instances[0].InstanceId" --output text)text)
