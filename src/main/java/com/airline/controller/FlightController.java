@@ -21,6 +21,11 @@ public class FlightController {
     @Autowired
     private FlightService flightService;
 
+    @GetMapping("")
+    public ResponseEntity<String> health(){
+        return new ResponseEntity<>("",HttpStatus.OK);
+    }
+
     //To Add flight
     @PostMapping("/")
     public ResponseEntity<Flight> addFlight(@RequestBody Flight flight){
