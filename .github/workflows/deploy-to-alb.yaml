@@ -68,6 +68,28 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
 
 
+
+  # Create known_hosts file inside SSH directory 
+   - name: Create SSH directory and known_hosts file
+     run: |
+       mkdir -p ~/.ssh
+       touch ~/.ssh/known_hosts
+
+   # Add private key to id_rsa
+   - name: Extract SSH private key    
+     run: echo "${{ secrets.PRIVATE_SSH_KEY }}" > ~/.ssh/id_rsa
+     shell: bash
+
+   # Grant read-write permission to id_rsa 
+   - name: Set proper permissions for the private key   # Giving permission to id_rsa 
+     run: chmod 600 ~/.ssh/id_rsa
+
+   # Install SSH Client
+   - name: Install SSH Client    
+     run: sudo apt-get install -y openssh-client
+
+
+
 # Deploying Application locally on EC2
 
    - name: Deploy to EC2   # In this step we are deploying our application on EC2 instance
