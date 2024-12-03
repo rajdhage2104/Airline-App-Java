@@ -40,8 +40,8 @@ jobs:
    - name: Deploy Application to EC2 Instances
      run: |
         # Deploy to EC2 instance 1
-        scp -i ~/.ssh/id_rsa target/airline-app.jar ubuntu@${{ secrets.INSTANCE_1_PUBLIC_IP }}:/home/ubuntu/airline-app/
-        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.INSTANCE_1_PUBLIC_IP }} 'java -jar /home/ubuntu/airline-app/airline-app.jar &'
+        scp -i ~/.ssh/id_rsa.pem target/airline-app.jar ubuntu@${{ secrets.INSTANCE_1_PUBLIC_IP }}:/home/ubuntu/airline-app/
+        ssh -i ~/.ssh/id_rsa.pem ubuntu@${{ secrets.INSTANCE_1_PUBLIC_IP }} 'java -jar /home/ubuntu/airline-app/airline-app.jar &'
         
         # Deploy to EC2 instance 2
         scp -i ~/.ssh/ssh-key target/airline-app.jar ubuntu@${{ secrets.INSTANCE_2_PUBLIC_IP }}:/home/ubuntu/airline-app/
