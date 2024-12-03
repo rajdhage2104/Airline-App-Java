@@ -10,6 +10,10 @@ jobs:
    name: Build and Deploy to AWS
    runs-on: ubuntu-latest
 
+   permissions:
+      id-token: write
+      contents: read
+
    steps:
    - name: Checkout Code
      uses: actions/checkout@v3
@@ -37,7 +41,7 @@ jobs:
      uses: aws-actions/configure-aws-credentials@v3
      with:
         role-to-assume: ${{ secrets.AWS_IAM_ARN }}
-        role-session-name: Airline-AWS-Github-OIDC-Role 
+        role-session-name: Airline-session 
         aws-region: ${{ secrets.AWS_REGION }}
 
    # 5. Add EC2 instances to known hosts (for SSH)
