@@ -14,10 +14,12 @@ jobs:
    - name: Checkout Code
      uses: actions/checkout@v3
 
-   - name: Setup Java
+   # Set up Java environment
+   - name: Set up JDK
      uses: actions/setup-java@v3
      with:
-        java-version: "17"
+       distribution: 'temurin'
+       java-version: '17'  # Adjust version as needeed
 
    - name: Build application
      run: mvn clean package
