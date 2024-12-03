@@ -37,7 +37,7 @@ jobs:
      uses: aws-actions/configure-aws-credentials@v3
      with:
         role-to-assume: ${{ secrets.AWS_IAM_ARN }}
-        role-session-name: samplesession
+        role-session-name: Airline-AWS-Github-OIDC-Role 
         aws-region: ${{ secrets.AWS_REGION }}
 
    # 5. Add EC2 instances to known hosts (for SSH)
