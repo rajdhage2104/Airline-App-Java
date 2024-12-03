@@ -30,29 +30,80 @@ jobs:
       aws-region: us-east-1 # Change to your AWS region
 
 
-   - name: Launch EC2 Instances
-     id: ec2
+   # 5. Add EC2 instances to known hosts (for SSH)
+   - name: Add EC2 Instances to Known Hosts
      run: |
-        # Launch two EC2 instances
+        ssh-keyscan -H ${{ secrets.INSTANCE_1_PUBLIC_IP }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H ${{ secrets.INSTANCE_2_PUBLIC_IP }} >> ~/.ssh/known_hosts
 
-        # Launch first instance
-        INSTANCE_ID_1=$(aws ec2 run-instances \
-          --image-id ami-005fc0f236362e99f \
-          --count 1 \
-          --instance-type t2.medium \
-          --key-name ssh-key \
-          --security-group-ids sg-07e932f4ed3166957 \
-          --subnet-id subnet-0fe87ebda1a7b5f53 \
-          --query "Instances[0].InstanceId" --output text)
+    # 6. Deploy Application to EC2 Instances
+   - name: Deploy Application to EC2 Instances
+     run: |
+        # Deploy to EC2 instance 1
+        scp -i ~/.ssh/id_rsa target/airline-app.jar ubuntu@${{ secrets.INSTANCE_1_PUBLIC_IP }}:/home/ubuntu/airline-app/
+        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.INSTANCE_1_PUBLIC_IP }} 'java -jar /home/ubuntu/airline-app/airline-app.jar &'
+        
+        # Deploy to EC2 instance 2
+        scp -i ~/.ssh/ssh-key target/airline-app.jar ubuntu@${{ secrets.INSTANCE_2_PUBLIC_IP }}:/home/ubuntu/airline-app/
+        ssh -i ~/.ssh/ssh-key ubuntu@${{ secrets.INSTANCE_2_PUBLIC_IP }} 'java -jar /home/ubuntu/airline-app/airline-app.jar &'
 
-        echo "Instance 1 launched with ID: $INSTANCE_ID_1"
+    # 7. Register EC2 Instances with Target Groups
+   - name: Register EC2 Instances with Target Groups
+     run: |
+        # Assuming Target Groups and ALB are already created
+        TG_ARN_1=${{ secrets.TARGET_GROUP_1_ARN }}
+        TG_ARN_2=${{ secrets.TARGET_GROUP_2_ARN }}
 
-        # Launch second instance
-        INSTANCE_ID_2=$(aws ec2 run-instances \
-          --image-id ami-005fc0f236362e99f \
-          --count 1 \
-          --instance-type t2.medium \
-          --key-name ssh-key \
-          --security-group-ids sg-07e932f4ed3166957 \
-          --subnet-id subnet-0efd990422b52c3e8 \
-          --query "Instances[0].InstanceId" --output text)
+        # Register EC2 instances to target groups
+        aws elbv2 register-targets --target-group-arn $TG_ARN_1 --targets Id=${{ secrets.INSTANCE_1_ID }}
+        aws elbv2 register-targets --target-group-arn $TG_ARN_2 --targets Id=${{ secrets.INSTANCE_2_ID }}
+
+
+     # 8. Create or update the Application Load Balancer Listener
+   - name: Create or Update ALB Listener
+     run: |
+        ALB_ARN=${{ secrets.ALB_ARN }}
+        
+        # Create listener for HTTP traffic
+        aws elbv2 create-listener \
+          --load-balancer-arn $ALB_ARN \
+          --protocol HTTP \
+          --port 80 \
+          --default-actions Type=forward,TargetGroupArn=${{ secrets.TARGET_GROUP_1_ARN }} \
+          --conditions Field=path-pattern,Values='/blue/*' \
+          --priority 1
+
+        # Optional: Set a second listener rule for blue-green deployment
+        aws elbv2 create-listener-rule \
+          --listener-arn $ALB_ARN \
+          --conditions Field=path-pattern,Values='/green/*' \
+          --actions Type=forward,TargetGroupArn=${{ secrets.TARGET_GROUP_2_ARN }} \
+          --priority 2
+
+
+   # - name: Launch EC2 Instances
+   #   id: ec2
+   #   run: |
+   #      # Launch two EC2 instances
+
+   #      # Launch first instance
+   #      INSTANCE_ID_1=$(aws ec2 run-instances \
+   #        --image-id ami-005fc0f236362e99f \
+   #        --count 1 \
+   #        --instance-type t2.medium \
+   #        --key-name ssh-key \
+   #        --security-group-ids sg-07e932f4ed3166957 \
+   #        --subnet-id subnet-0fe87ebda1a7b5f53 \
+   #        --query "Instances[0].InstanceId" --output text)
+
+   #      echo "Instance 1 launched with ID: $INSTANCE_ID_1"
+
+   #      # Launch second instance
+   #      INSTANCE_ID_2=$(aws ec2 run-instances \
+   #        --image-id ami-005fc0f236362e99f \
+   #        --count 1 \
+   #        --instance-type t2.medium \
+   #        --key-name ssh-key \
+   #        --security-group-ids sg-07e932f4ed3166957 \
+   #        --subnet-id subnet-0efd990422b52c3e8 \
+   #        --query "Instances[0].InstanceId" --output text)
