@@ -98,7 +98,7 @@ jobs:
        ssh -v -i ~/.ssh/id_rsa ubuntu@${{ secrets.INSTANCE_PUBLIC_IP }} '
        cd Airline-App-Java || exit 1
        mvn clean package || exit 2
-       nohup java -jar target/airline-app.jar &
+       nohup java -jar target/airline-app.jar > app.log 2>&1 &
        echo "Application started on EC2"
        '
 
@@ -110,7 +110,7 @@ jobs:
        ssh -v -i ~/.ssh/id_rsa ubuntu@${{ secrets.INSTANCE_PUBLIC_IP_1 }} '
        cd Airline-App-Java || exit 1
        mvn clean package || exit 2
-       nohup java -jar target/airline-app.jar &
+       nohup java -jar target/airline-app.jar > app.log 2>&1 &
        echo "Application started on EC2"
        '
 
