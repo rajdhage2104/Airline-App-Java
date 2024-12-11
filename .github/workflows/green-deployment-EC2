@@ -98,7 +98,7 @@ jobs:
        scp -i ~/.ssh/id_rsa target/airline-app.jar ubuntu@${{ secrets.INSTANCE_PUBLIC_IP_1 }}:/home/ubuntu/
        ssh -v -i ~/.ssh/id_rsa ubuntu@${{ secrets.INSTANCE_PUBLIC_IP }} '
        nohup java -jar airline-app.jar > app.log 2>&1 &
-       echo "Application started on EC2"
+       echo "Application started green-env on EC2"
        '
 
 
