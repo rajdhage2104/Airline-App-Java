@@ -97,7 +97,7 @@ jobs:
        ssh-keyscan -H ${{ secrets.INSTANCE_PUBLIC_IP }} >> ~/.ssh/known_hosts
        scp -i ~/.ssh/id_rsa target/airline-app.jar ubuntu@${{ secrets.INSTANCE_PUBLIC_IP }}:/home/ubuntu/
        ssh -v -i ~/.ssh/id_rsa ubuntu@${{ secrets.INSTANCE_PUBLIC_IP }} '
-       nohup java -jar target/airline-app.jar > app.log 2>&1 &
+       nohup java -jar airline-app.jar > app.log 2>&1 &
        echo "Application started on EC2"
        '
 
