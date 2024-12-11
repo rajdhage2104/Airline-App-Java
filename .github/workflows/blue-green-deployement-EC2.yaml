@@ -97,7 +97,7 @@ jobs:
 
 # Deploying Application locally on EC2 instance
 
-   - name: Blue Deploy to EC2   # In this step we are deploying our application on EC2 instance
+   - name: Deploy to EC2   # In this step we are deploying our application on EC2 instance
      run: |
        if [ "${{ github.event.inputs.environment }}" == "blue" ]; then
         TARGET_IP=${{ secrets.INSTANCE_PUBLIC_IP_BLUE }}
