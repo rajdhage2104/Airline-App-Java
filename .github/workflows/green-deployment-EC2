@@ -1,0 +1,106 @@
+name: Deploy Application to AWS
+
+on:
+ push:
+  branches:
+    - master
+
+jobs:
+  deploy:
+   name: Build and Deploy to AWS
+   runs-on: ubuntu-latest
+
+   permissions:
+      id-token: write
+      contents: read
+
+   steps:
+   - name: Checkout Code
+     uses: actions/checkout@v3
+
+   # Set up Java environment
+   - name: Set up JDK
+     uses: actions/setup-java@v3
+     with:
+       distribution: 'temurin'
+       java-version: '17'  # Adjust version as needeed
+
+   # Cache Maven dependencies
+   - name: Cache Maven packages
+     uses: actions/cache@v2
+     with:
+       path: ~/.m2
+       key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+       restore-keys: ${{ runner.os }}-maven
+
+   # Install dependencies and run tests
+   - name: Build with Maven
+     run: |
+       mvn clean install
+
+   # Generate code coverage report
+   - name: Generate code coverage report
+     run: |
+       mvn jacoco:report
+       
+   # Upload code coverage report as artifacts
+   - name: Archive code coverage report
+     uses: actions/upload-artifact@v3
+     with:
+       name: code-coverage-report
+       path: target/site/jacoco
+
+   #  Sonarqube 
+   - name: Build and analyze
+     env:
+         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+     run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Airline-sonarqube -Dsonar.projectName='Airline-sonarqube'
+
+         
+
+  # Build trust between GitHub and AWS using OIDC connector
+   - name: configure aws credentials
+     uses: aws-actions/configure-aws-credentials@v3
+     with:
+        role-to-assume: ${{ secrets.AWS_IAM_ARN }}
+        role-session-name: Airline-session 
+        aws-region: ${{ secrets.AWS_REGION }}
+
+
+
+  # Create known_hosts file inside SSH directory 
+   - name: Create SSH directory and known_hosts file
+     run: |
+       mkdir -p ~/.ssh
+       touch ~/.ssh/known_hosts
+
+   # Add private key to id_rsa
+   - name: Extract SSH private key    
+     run: echo "${{ secrets.PRIVATE_SSH_KEY }}" > ~/.ssh/id_rsa
+     shell: bash
+
+   # Grant read-write permission to id_rsa 
+   - name: Set proper permissions for the private key   # Giving permission to id_rsa 
+     run: chmod 600 ~/.ssh/id_rsa
+
+   # Install SSH Client
+   - name: Install SSH Client    
+     run: sudo apt-get install -y openssh-client
+
+
+
+# Deploying Application locally on EC2
+
+   - name: Deploy to EC2   # In this step we are deploying our application on EC2 instance
+     run: |
+       ssh-keyscan -H ${{ secrets.INSTANCE_PUBLIC_IP_1 }} >> ~/.ssh/known_hosts
+       scp -i ~/.ssh/id_rsa target/airline-app.jar ubuntu@${{ secrets.INSTANCE_PUBLIC_IP_1 }}:/home/ubuntu/
+       ssh -v -i ~/.ssh/id_rsa ubuntu@${{ secrets.INSTANCE_PUBLIC_IP }} '
+       nohup java -jar airline-app.jar > app.log 2>&1 &
+       echo "Application started on EC2"
+       '
+
+
+  
+  
