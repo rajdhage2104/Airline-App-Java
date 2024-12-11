@@ -1,9 +1,15 @@
-name: Deploy Application to AWS
+name: Green Deployment to AWS
 
 on:
- push:
-  branches:
-    - master
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select the deployment environment (green)'
+        required: true
+        type: choice
+        options:
+          - green
+        default: green
 
 jobs:
   deploy:
