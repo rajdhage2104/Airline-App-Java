@@ -21,7 +21,7 @@ public class FlightController {
     @Autowired
     private FlightService flightService;
 
-    @GetMapping("/")
+    @GetMapping("/health")
     public ResponseEntity<String> health(){
         return new ResponseEntity<>("",HttpStatus.OK);
     }
