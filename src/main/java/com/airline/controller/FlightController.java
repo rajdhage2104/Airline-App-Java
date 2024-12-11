@@ -14,14 +14,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/flight")
+// @RequestMapping("/flight")
 @CrossOrigin(origins = "*")
 public class FlightController {
 
     @Autowired
     private FlightService flightService;
 
-    @GetMapping("")
+    @GetMapping("/")
     public ResponseEntity<String> health(){
         return new ResponseEntity<>("",HttpStatus.OK);
     }
@@ -40,7 +40,7 @@ public class FlightController {
 //        return new ResponseEntity<>(allFlight,HttpStatus.OK);
 //    }
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<List<FlightWithIP>> getAllFlight() throws UnknownHostException {
         List<Flight> allFlights = flightService.getAllFlight();
         String serverIP = InetAddress.getLocalHost().getHostAddress();
