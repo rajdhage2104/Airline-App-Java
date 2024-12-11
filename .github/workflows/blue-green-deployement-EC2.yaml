@@ -95,7 +95,7 @@ jobs:
 
 
 
-# Deploying Application locally on EC2
+# Deploying Application locally on EC2 instance
 
    - name: Blue Deploy to EC2   # In this step we are deploying our application on EC2 instance
      run: |
