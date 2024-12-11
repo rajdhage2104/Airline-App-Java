@@ -23,7 +23,7 @@ public class FlightController {
 
     @GetMapping("/health")
     public ResponseEntity<String> health(){
-        return new ResponseEntity<>("",HttpStatus.OK);
+        return new ResponseEntity<>("Healthy!!!",HttpStatus.OK);
     }
 
     //To Add flight
