@@ -95,24 +95,12 @@ jobs:
    - name: Deploy to EC2   # In this step we are deploying our application on EC2 instance
      run: |
        ssh-keyscan -H ${{ secrets.INSTANCE_PUBLIC_IP }} >> ~/.ssh/known_hosts
+       scp -i ~/.ssh/id_rsa target/airline-app.jar ubuntu@${{ secrets.INSTANCE_PUBLIC_IP }}:/home/ubuntu/
        ssh -v -i ~/.ssh/id_rsa ubuntu@${{ secrets.INSTANCE_PUBLIC_IP }} '
-       cd Airline-App-Java || exit 1
-       mvn clean package || exit 2
        nohup java -jar target/airline-app.jar > app.log 2>&1 &
        echo "Application started on EC2"
        '
 
- # Deploying Application locally on EC2
-
-   - name: Deploy to EC2   # In this step we are deploying our application on EC2 instance
-     run: |
-       ssh-keyscan -H ${{ secrets.INSTANCE_PUBLIC_IP_1 }} >> ~/.ssh/known_hosts
-       ssh -v -i ~/.ssh/id_rsa ubuntu@${{ secrets.INSTANCE_PUBLIC_IP_1 }} '
-       cd Airline-App-Java || exit 1
-       mvn clean package || exit 2
-       nohup java -jar target/airline-app.jar > app.log 2>&1 &
-       echo "Application started on EC2"
-       '
 
   
   
