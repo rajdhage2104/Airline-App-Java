@@ -40,7 +40,7 @@ public class FlightController {
 //        return new ResponseEntity<>(allFlight,HttpStatus.OK);
 //    }
 
-    @GetMapping("")
+    @GetMapping("/")
     public ResponseEntity<List<FlightWithIP>> getAllFlight() throws UnknownHostException {
         List<Flight> allFlights = flightService.getAllFlight();
         String serverIP = InetAddress.getLocalHost().getHostAddress();
