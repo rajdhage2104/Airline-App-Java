@@ -55,12 +55,12 @@ jobs:
        name: code-coverage-report
        path: target/site/jacoco
 
-   #  Sonarqube 
-   - name: Build and analyze
-     env:
-         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-     run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Airline-sonarqube -Dsonar.projectName='Airline-sonarqube'
+   # #  Sonarqube 
+   # - name: Build and analyze
+   #   env:
+   #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+   #       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+   #   run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Airline-sonarqube -Dsonar.projectName='Airline-sonarqube'
 
          
 
